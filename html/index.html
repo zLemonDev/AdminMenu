@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Menu - FiveM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --sidebar-width: 230px;
+      --primary: #222e3c;
+      --secondary: #313e50;
+      --accent: #3498db;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --text: #f8f8f8;
+      --bg: #1a222b;
+      --border-radius: 8px;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--primary);
+      padding: 30px 10px 20px 10px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .sidebar h2 {
+      margin-bottom: 40px;
+      color: var(--accent);
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+    }
+    .nav {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .nav button {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.1rem;
+      padding: 12px 20px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: var(--border-radius);
+      transition: background 0.2s;
+    }
+    .nav button.active, .nav button:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .main-content {
+      flex: 1;
+      padding: 30px 40px;
+      background: var(--bg);
+      min-height: 100vh;
+      transition: background 0.3s;
+    }
+    .section {
+      display: none;
+      animation: fadeIn 0.4s;
+    }
+    .section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0;}
+      to { opacity: 1;}
+    }
+    /* Dashboard Cards */
+    .cards {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 35px;
+    }
+    .card {
+      background: var(--secondary);
+      border-radius: var(--border-radius);
+      padding: 30px;
+      min-width: 170px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .card h3 {
+      margin: 0;
+      margin-bottom: 8px;
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+    .card span {
+      color: #bbb;
+      font-size: 1rem;
+    }
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--secondary);
+      border-radius: var(--border-radius);
+      margin-bottom: 28px;
+      overflow: hidden;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.06);
+    }
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+    }
+    th {
+      background: var(--primary);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    tr:nth-child(even) {
+      background: #253142;
+    }
+    tr:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    /* Buttons */
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 1rem;
+      margin-right: 6px;
+      transition: background 0.2s;
+    }
+    .btn.danger { background: var(--danger);}
+    .btn.success { background: var(--success);}
+    .btn:active { transform: scale(0.97);}
+    /* Forms */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+    input, select {
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      border: none;
+      background: var(--secondary);
+      color: var(--text);
+      width: 100%;
+      font-size: 1rem;
+    }
+    /* Responsive */
+    @media (max-width: 900px) {
+      .main-content { padding: 20px;}
+      .cards { flex-direction: column;}
+    }
+    @media (max-width: 600px) {
+      .sidebar { display: none;}
+      .main-content { padding: 10px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Admin Menu</h2>
+    <div class="nav">
+      <button class="active" onclick="showSection('dashboard')">Dashboard</button>
+      <button onclick="showSection('players')">Player List</button>
+      <button onclick="showSection('users')">Manage Admins</button>
+      <button onclick="showSection('server')">Server Control</button>
+      <button onclick="showSection('logs')">Logs</button>
+    </div>
+  </div>
+  <div class="main-content">
+    <!-- Dashboard -->
+    <div id="dashboard" class="section active">
+      <h1>Dashboard</h1>
+      <div class="cards">
+        <div class="card">
+          <h3 id="onlineCount">0</h3>
+          <span>Online Players</span>
+        </div>
+        <div class="card">
+          <h3 id="adminCount">0</h3>
+          <span>Admins Online</span>
+        </div>
+        <div class="card">
+          <h3 id="uptime">00:00:00</h3>
+          <span>Server Uptime</span>
+        </div>
+      </div>
+      <h2>Quick Actions</h2>
+      <button class="btn" onclick="showSection('players')">Manage Players</button>
+      <button class="btn" onclick="showSection('server')">Control Server</button>
+    </div>
+    <!-- Player List -->
+    <div id="players" class="section">
+      <h1>Player List</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Steam</th>
+            <th>Ping</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="playerTable">
+          <!-- JS Populated -->
+        </tbody>
+      </table>
+    </div>
+    <!-- Manage Admins -->
+    <div id="users" class="section">
+      <h1>Manage Admins</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Steam</th>
+            <th>Rank</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminTable">
+          <!-- JS Populated -->
+        </tbody>
+      </table>
+      <h2>Add Admin</h2>
+      <form id="addAdminForm" onsubmit="addAdmin(event)">
+        <div class="form-group">
+          <label for="adminName">Name</label>
+          <input type="text" id="adminName" required>
+        </div>
+        <div class="form-group">
+          <label for="adminSteam">Steam</label>
+          <input type="text" id="adminSteam" required>
+        </div>
+        <div class="form-group">
+          <label for="adminRank">Rank</label>
+          <select id="adminRank" required>
+            <option value="Moderator">Moderator</option>
+            <option value="Admin">Admin</option>
+            <option value="SuperAdmin">SuperAdmin</option>
+          </select>
+        </div>
+        <button class="btn success" type="submit">Add Admin</button>
+      </form>
+    </div>
+    <!-- Server Control -->
+    <div id="server" class="section">
+      <h1>Server Control</h1>
+      <div class="cards">
+        <div class="card">
+          <h3>Kick All</h3>
+          <button class="btn danger" onclick="kickAll()">Kick All Players</button>
+        </div>
+        <div class="card">
+          <h3>Restart</h3>
+          <button class="btn danger" onclick="restartServer()">Restart Server</button>
+        </div>
+        <div class="card">
+          <h3>Message</h3>
+          <button class="btn" onclick="broadcastMessage()">Broadcast Message</button>
+        </div>
+      </div>
+    </div>
+    <!-- Logs -->
+    <div id="logs" class="section">
+      <h1>Logs</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody id="logTable">
+          <!-- JS Populated -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    // Navigation logic
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+      [...document.querySelectorAll('.nav button')].find(b => b.textContent.replace(/\s/g,'').toLowerCase().includes(id)).classList.add('active');
+    }
+    // Dummy data for demo
+    const players = [
+      {id: 1, name: "PlayerOne", steam: "STEAM_0:1:12345", ping: 32},
+      {id: 2, name: "PlayerTwo", steam: "STEAM_0:1:22222", ping: 45},
+      {id: 3, name: "PlayerThree", steam: "STEAM_0:1:33333", ping: 59}
+    ];
+    const admins = [
+      {name: "AdminUser", steam: "STEAM_0:1:11111", rank: "SuperAdmin"}
+    ];
+    const logs = [
+      {time: "2025-06-16 18:30", type: "Kick", detail: "AdminUser kicked PlayerTwo"},
+      {time: "2025-06-16 18:31", type: "Ban", detail: "AdminUser banned PlayerThree"}
+    ];
+    // Populate tables
+    function renderPlayers() {
+      let html = '';
+      players.forEach(p => {
+        html += `<tr>
+          <td>${p.id}</td>
+          <td>${p.name}</td>
+          <td>${p.steam}</td>
+          <td>${p.ping}</td>
+          <td>
+            <button class="btn" onclick="kickPlayer(${p.id})">Kick</button>
+            <button class="btn danger" onclick="banPlayer(${p.id})">Ban</button>
+          </td>
+        </tr>`;
+      });
+      document.getElementById('playerTable').innerHTML = html;
+      document.getElementById('onlineCount').textContent = players.length;
+    }
+    function renderAdmins() {
+      let html = '';
+      admins.forEach((a, i) => {
+        html += `<tr>
+          <td>${a.name}</td>
+          <td>${a.steam}</td>
+          <td>${a.rank}</td>
+          <td>
+            <button class="btn danger" onclick="removeAdmin(${i})">Remove</button>
+          </td>
+        </tr>`;
+      });
+      document.getElementById('adminTable').innerHTML = html;
+      document.getElementById('adminCount').textContent = admins.length;
+    }
+    function renderLogs() {
+      let html = '';
+      logs.forEach(l => {
+        html += `<tr>
+          <td>${l.time}</td>
+          <td>${l.type}</td>
+          <td>${l.detail}</td>
+        </tr>`;
+      });
+      document.getElementById('logTable').innerHTML = html;
+    }
+    // Dummy server uptime
+    setInterval(() => {
+      const uptimeEl = document.getElementById('uptime');
+      if (uptimeEl) {
+        let now = new Date();
+        let hours = String(now.getHours()).padStart(2,'0');
+        let mins = String(now.getMinutes()).padStart(2,'0');
+        let secs = String(now.getSeconds()).padStart(2,'0');
+        uptimeEl.textContent = `${hours}:${mins}:${secs}`;
+      }
+    }, 1000);
+    // Dummy functions for actions
+    function kickPlayer(id){
+      alert("Kick player " + id);
+    }
+    function banPlayer(id){
+      alert("Ban player " + id);
+    }
+    function kickAll(){
+      alert("All players kicked");
+    }
+    function restartServer(){
+      alert("Server restarting...");
+    }
+    function broadcastMessage(){
+      let msg = prompt("Enter message to broadcast:");
+      if(msg) alert("Broadcast: " + msg);
+    }
+    function addAdmin(e){
+      e.preventDefault();
+      let name = document.getElementById('adminName').value;
+      let steam = document.getElementById('adminSteam').value;
+      let rank = document.getElementById('adminRank').value;
+      admins.push({name, steam, rank});
+      renderAdmins();
+      e.target.reset();
+    }
+    function removeAdmin(i){
+      if(confirm("Remove this admin?")){
+        admins.splice(i,1);
+        renderAdmins();
+      }
+    }
+    // Initial rendering
+    renderPlayers();
+    renderAdmins();
+    renderLogs();
+  </script>
+</body>
+</html>
